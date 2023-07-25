@@ -4,11 +4,17 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.PropertyPreFilter;
 import com.alibaba.fastjson.support.spring.PropertyPreFilters;
 import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.jia.dga.common.util.SqlUtil;
 import com.jia.dga.meta.bean.TableMetaInfo;
+import com.jia.dga.meta.bean.TableMetaInfoExtra;
+import com.jia.dga.meta.bean.TableMetaInfoForQuery;
+import com.jia.dga.meta.bean.TableMetaInfoVO;
 import com.jia.dga.meta.mapper.TableMetaInfoMapper;
 import com.jia.dga.meta.service.TableMetaInfoExtraService;
 import com.jia.dga.meta.service.TableMetaInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.arrow.flatbuf.Int;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -55,6 +61,72 @@ public class TableMetaInfoServiceImpl extends ServiceImpl<TableMetaInfoMapper, T
     String url;
 
 
+    //select *  from table_meta_info t1 join table_meta_info_extra t2 on t1.schema_name = t2.schema_name
+    // and t1.table_name = t2.table_name  where t1.schema_name like '%%' and t1.table_name like '%%'
+    // and t1.dw_level = '' and assess_date = (select max(assess_date) from table_meta_info t3 where t1.schema_name = t3.schema_name
+    // and t1.table_name = t3.table_name)
+    //根据查询条件和分页进行查询
+    @Override
+    public List<TableMetaInfoVO> getTableListForPage(TableMetaInfoForQuery metaInfoForQuery) {
+        StringBuilder sql = new StringBuilder(200);
+        sql.append("select t1.id ,t1.table_name,t1.schema_name,table_comment,table_size,table_total_size," +
+                "tec_owner_user_name,busi_owner_user_name, table_last_access_time,table_last_modify_time" +
+                " from table_meta_info t1 join table_meta_info_extra t2 on t1.schema_name = t2.schema_name\n" +
+                "and t1.table_name = t2.table_name ");
+        sql.append("where  assess_date = (select max(assess_date) from table_meta_info t3 where t1.schema_name = t3.schema_name\n" +
+                "and t1.table_name = t3.table_name)");
+        if (metaInfoForQuery.getTableName()!=null && metaInfoForQuery.getTableName().trim().length()!=0){
+            sql.append(" and t1.table_name like '%").append(SqlUtil.filterUnsafeSql(metaInfoForQuery.getTableName())).append("%'");
+        }
+        if (metaInfoForQuery.getSchemaName()!=null && metaInfoForQuery.getSchemaName().trim().length()!=0){
+            sql.append(" and t1.schema_name like '%").append(SqlUtil.filterUnsafeSql(metaInfoForQuery.getSchemaName())).append("%'");
+        }
+        if (metaInfoForQuery.getDwLevel()!=null && metaInfoForQuery.getDwLevel().trim().length()!=0){
+            sql.append(" and t2.dw_level ='").append(SqlUtil.filterUnsafeSql(metaInfoForQuery.getDwLevel())).append("'");
+        }
+        // 获取行数 并拼接到sql中
+        Integer row = (metaInfoForQuery.getPageNo()-1) *  metaInfoForQuery.getPageSize();
+        sql.append(" limit " + row + "," + metaInfoForQuery.getPageSize());
+
+        return this.baseMapper.selectTableMetaInfoPage(sql.toString());
+    }
+
+    @Override
+    public Integer getTableTotalForPage(TableMetaInfoForQuery metaInfoForQuery) {
+        StringBuilder sql = new StringBuilder(200);
+        sql.append("select count(*)" +
+                " from table_meta_info t1 join table_meta_info_extra t2 on t1.schema_name = t2.schema_name\n" +
+                "and t1.table_name = t2.table_name ");
+        sql.append(" where  assess_date = (select max(assess_date) from table_meta_info t3 where t1.schema_name = t3.schema_name\n" +
+                "and t1.table_name = t3.table_name)");
+        if (metaInfoForQuery.getTableName()!=null && metaInfoForQuery.getTableName().trim().length()!=0){
+            sql.append(" and t1.table_name like '%").append(metaInfoForQuery.getTableName()).append("%'");
+        }
+        if (metaInfoForQuery.getSchemaName()!=null && metaInfoForQuery.getSchemaName().trim().length()!=0){
+            sql.append(" and t1.schema_name like '%").append(metaInfoForQuery.getSchemaName()).append("%'");
+        }
+        if (metaInfoForQuery.getDwLevel()!=null && metaInfoForQuery.getDwLevel().trim().length()!=0){
+            sql.append(" and t2.dw_level ='").append(metaInfoForQuery.getDwLevel()).append("'");
+        }
+
+        return this.baseMapper.selectTableMetaInfoTotalPage(sql.toString());
+    }
+
+    @Override
+    public TableMetaInfo getTableMetaInfoById(Long tableId) {
+        TableMetaInfo tableMetaInfo = getById(tableId);
+        TableMetaInfoExtra tableMetaInfoExtra = tableMetaInfoExtraService.getOne(new QueryWrapper<TableMetaInfoExtra>()
+                .eq("table_name", tableMetaInfo.getTableName())
+                .eq("schema_name", tableMetaInfo.getSchemaName()));
+        tableMetaInfo.setTableMetaInfoExtra(tableMetaInfoExtra);
+        return tableMetaInfo;
+    }
+
+    @Override
+    public List<TableMetaInfo> getTableMetaWithExtraList() {
+        return baseMapper.selectTableMetaWithExtraList();
+    }
+
     @Override
     public void initTableMetaInfo(String assessDate, String schemaName) throws Exception {
         List<String> tables = hiveMetaStoreClient.getAllTables(schemaName);
@@ -80,6 +152,8 @@ public class TableMetaInfoServiceImpl extends ServiceImpl<TableMetaInfoMapper, T
         //初始化辅助信息表
         System.out.println(tableMetaInfoList);
     }
+
+
 
     private void addHdfsInfo(TableMetaInfo metaInfo) throws Exception {
         //从hdfs中获取数据

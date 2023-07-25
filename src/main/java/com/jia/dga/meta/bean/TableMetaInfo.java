@@ -1,6 +1,7 @@
 package com.jia.dga.meta.bean;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
@@ -156,4 +157,7 @@ public class TableMetaInfo implements Serializable {
      * 更新时间  (自动生成)
      */
     private Date updateTime;
+
+    @TableField(exist = false)
+    private TableMetaInfoExtra tableMetaInfoExtra;
 }

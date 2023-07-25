@@ -1,4 +1,4 @@
-package com.jia.dga.common;
+package com.jia.dga.common.constant;
 
 public class MetaConst {
 

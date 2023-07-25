@@ -1,7 +1,8 @@
 package com.jia.dga.meta.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.jia.dga.common.MetaConst;
+import com.jia.dga.common.constant.MetaConst;
 import com.jia.dga.meta.bean.TableMetaInfo;
 import com.jia.dga.meta.bean.TableMetaInfoExtra;
 import com.jia.dga.meta.mapper.TableMetaInfoExtraMapper;
@@ -14,7 +15,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * <p>
@@ -25,6 +25,7 @@ import java.util.stream.Stream;
  * @since 2023-07-22
  */
 @Service
+@DS("dga")
 public class  TableMetaInfoExtraServiceImpl extends ServiceImpl<TableMetaInfoExtraMapper, TableMetaInfoExtra> implements TableMetaInfoExtraService {
 
 
@@ -34,7 +35,7 @@ public class  TableMetaInfoExtraServiceImpl extends ServiceImpl<TableMetaInfoExt
         // 只初始化未生成的表
         List<String> tableNameList = tableMetaInfoList.stream().map(tableMetaInfo -> tableMetaInfo.getSchemaName() + "." + tableMetaInfo.getTableName()).collect(Collectors.toList());
 
-        List<TableMetaInfoExtra> existExtraList = this.list(new QueryWrapper<TableMetaInfoExtra>().in("concat(schema_name,',',table_name)", tableNameList));
+        List<TableMetaInfoExtra> existExtraList = this.list(new QueryWrapper<TableMetaInfoExtra>().in("concat(schema_name,'.',table_name)", tableNameList));
         Set<String> existExtraSet = existExtraList.stream().map(tableMetaInfoExtra -> tableMetaInfoExtra.getSchemaName() + "." + tableMetaInfoExtra.getTableName()).collect(Collectors.toSet());
         tableMetaInfoList.removeIf(tableMetaInfo -> existExtraSet.contains(tableMetaInfo.getSchemaName()+"."+tableMetaInfo.getTableName()));
         ArrayList<TableMetaInfoExtra> tableMetaInfoExtraList = new ArrayList<>(tableMetaInfoList.size());
