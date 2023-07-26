@@ -1,10 +1,10 @@
 package com.jia.dga.meta.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.PropertyPreFilter;
 import com.alibaba.fastjson.support.spring.PropertyPreFilters;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jia.dga.common.util.SqlUtil;
 import com.jia.dga.meta.bean.TableMetaInfo;
 import com.jia.dga.meta.bean.TableMetaInfoExtra;
@@ -13,8 +13,6 @@ import com.jia.dga.meta.bean.TableMetaInfoVO;
 import com.jia.dga.meta.mapper.TableMetaInfoMapper;
 import com.jia.dga.meta.service.TableMetaInfoExtraService;
 import com.jia.dga.meta.service.TableMetaInfoService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.arrow.flatbuf.Int;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -24,17 +22,12 @@ import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.Table;
-import org.apache.hadoop.hive.metastore.conf.MetastoreConf;
-import org.apache.hadoop.hive.ql.metadata.Hive;
-import org.apache.thrift.TException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -129,6 +122,8 @@ public class TableMetaInfoServiceImpl extends ServiceImpl<TableMetaInfoMapper, T
 
     @Override
     public void initTableMetaInfo(String assessDate, String schemaName) throws Exception {
+
+        remove(new QueryWrapper<TableMetaInfo>().eq("assess_date",assessDate));
         List<String> tables = hiveMetaStoreClient.getAllTables(schemaName);
 
         List<TableMetaInfo> tableMetaInfoList = new ArrayList<>();
@@ -147,10 +142,7 @@ public class TableMetaInfoServiceImpl extends ServiceImpl<TableMetaInfoMapper, T
         //初始化
         this.saveBatch(tableMetaInfoList);
         tableMetaInfoExtraService.initTableMateExtra(assessDate,tableMetaInfoList);
-
-
         //初始化辅助信息表
-        System.out.println(tableMetaInfoList);
     }
 
 

@@ -1,14 +1,11 @@
 package com.jia.dga;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.jia.dga.governance.service.GovernanceAssessDetailService;
 import com.jia.dga.meta.service.TableMetaInfoService;
-import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
 
 @SpringBootTest
 class DgaApplicationTests {
@@ -21,7 +18,7 @@ class DgaApplicationTests {
 
     @Test
     public void testInitMeta() throws Exception {
-        tableMetaInfoService.initTableMetaInfo("2022-07-22","gmall");
+        tableMetaInfoService.initTableMetaInfo("2023-05-02","gmall");
     }
 
     @Test
