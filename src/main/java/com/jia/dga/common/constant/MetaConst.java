@@ -19,4 +19,6 @@ public class MetaConst {
     public static final String SECURITY_LEVEL_INTERNAL="INTERNAL";  //内部
     public static final String SECURITY_LEVEL_SECRET="SECRET";  //保密
     public static final String SECURITY_LEVEL_HIGH="HIGH";  //高度机密
+    public static final String TASK_STATE_SUCCESS="7";  //高度机密
+    public static final String TASK_STATE_FAILED="6";  //高度机密
 }

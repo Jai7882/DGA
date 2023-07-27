@@ -9,11 +9,9 @@ import com.jia.dga.meta.bean.TableMetaInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,7 +61,7 @@ public class HasSimilarTableAssessor extends Assessor {
             List<JSONObject> currentObjects = JSON.parseArray(tableMetaInfo.getColNameJson(), JSONObject.class);
             // 比对表字段集合
             List<JSONObject> assessObjects = JSON.parseArray(metaInfoFromList.getColNameJson(), JSONObject.class);
-            Integer count = 0;
+            int count = 0;
 
             // 4.2 循环考评表的所有字段
             for (JSONObject currentColJsonObject : currentObjects) {

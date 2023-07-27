@@ -36,7 +36,7 @@ public class TableMetaInfoController {
         List<TableMetaInfoVO> tableMetaList = tableMetaInfoService.getTableListForPage(metaInfoForQuery);
         Integer totalPage = tableMetaInfoService.getTableTotalForPage(metaInfoForQuery);
         HashMap<String, Object> result = new HashMap<>();
-        result.put("totalPage",totalPage);
+        result.put("total",totalPage);
         result.put("list",tableMetaList);
         return JSON.toJSONString(result);
     }

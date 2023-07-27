@@ -28,7 +28,6 @@ public class TecOwnerAssessor extends Assessor {
             governanceAssessDetail.setAssessProblem("技术负责人为空");
             String url = assessParam.getGovernanceMetric().getGovernanceUrl().replace("{tableId}", assessParam.getTableMetaInfo().getId().toString());
             governanceAssessDetail.setGovernanceUrl(url);
-            System.out.println(1/0);
         }
     }
 }

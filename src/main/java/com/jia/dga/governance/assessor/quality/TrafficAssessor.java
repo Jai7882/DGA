@@ -53,10 +53,10 @@ public class TrafficAssessor extends Assessor {
             // 4 通过目录名访问hdfs遍历获得该目录的大小
             // 获得当前考评日期前一天的文件大小
             Long currentSize = getBatchDirSize(currentPartitionDirName, assessParam.getTableMetaInfo().getTableFsOwner());
-            Long totalCount = 0L;
-            Long totalDaysSize = 0l;
+            long totalCount = 0L;
+            long totalDaysSize = 0L;
             // 获得days天内的文件总大小
-            for (Integer i = 1; i <= days; i++) {
+            for (int i = 1; i <= days; i++) {
                 partitionDate = DateUtils.addDays(DateUtils.parseDate(assessDate, "yyyy-MM-dd"), -i);
                 formattedDate = DateFormatUtils.format(partitionDate, "yyyy-MM-dd");
                 currentPartitionDirName = tableFsPath + "/" + partitionName + "=" + formattedDate;
